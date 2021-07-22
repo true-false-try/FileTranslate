@@ -7,14 +7,14 @@ import com.squareup.okhttp.*;
 
 
 public class Translate {
-    private static String subscriptionKey = "bddd7d10138b4e7583c5881db86757a0";
+    private static String subscriptionKey = "35b54de43ed24d27a13d80a5ab161944";
 
     // Default location is a global.
     private static String location = "global";
 
     HttpUrl url = new HttpUrl.Builder()
             .scheme("https")
-                .host("api.cognitive.microsofttranslator.com")
+            .host("api.cognitive.microsofttranslator.com")
             .addPathSegment("/translate")
             .addQueryParameter("api-version", "3.0")
             .addQueryParameter("from", "ru")
@@ -29,7 +29,8 @@ public class Translate {
     public String Post(String str) throws IOException {
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType,
-                "[{\"Text\":" + str +  "}]");
+
+                "[{\"Text\": \"" + str + "\"}]");
         Request request = new Request.Builder().url(url).post(body)
                 .addHeader("Ocp-Apim-Subscription-Key", subscriptionKey)
                 .addHeader("Ocp-Apim-Subscription-Region", location)
@@ -47,14 +48,5 @@ public class Translate {
         return gson.toJson(json);
     }
 
-    /*public static void main(String[] args) {
-        try {
-            Translate translateRequest = new Translate();
-            String response = translateRequest.Post();
-            System.out.println(prettify(response));
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-    }*/
 }
 
