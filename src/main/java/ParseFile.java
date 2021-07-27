@@ -4,45 +4,79 @@ import java.io.FileReader;
 import java.util.Arrays;
 import java.io.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.regex.Pattern;
 
 
 public class ParseFile {
-
     @SuppressWarnings("resource")
+    Translate translateRequest;
+    CSVReader reader;
+    String csv;
+    ParseFile(String readFrom, String writeTo) throws Exception{
+        reader = new CSVReader(new FileReader(readFrom));
+        csv = writeTo;
+    }
 
-    public static void main(String[] args) throws IOException, CsvValidationException {
-        Translate translateRequest;
-        CSVReader reader = new CSVReader(new FileReader("C:\\Users\\user\\IdeaProjects\\FileTranslate\\src\\main\\java\\files\\QER_Translation.csv"));
-        String csv = "C:\\Users\\user\\IdeaProjects\\FileTranslate\\src\\main\\java\\outputFiles\\Translate.csv";
-        ArrayList<String[]> list = new ArrayList<>();
-        CSVWriter writer = new CSVWriter(new FileWriter(csv));
+        public void parseAndWriteToFile(ParseFile parseFile) throws IOException, CsvValidationException {
+        int count = 1;
+            CSVWriter writer =
+                    new CSVWriter(
+                            new FileWriter(csv),
+                            ';',
+                            CSVWriter.NO_QUOTE_CHARACTER,
+                            '#',
+                            CSVWriter.DEFAULT_LINE_END);
+            String[] nextLine;
 
-        String[] nextLine;
-        while ((nextLine = reader.readNext()) != null) {
-            if (nextLine != null) {
-
-                //Verifying the read data here
-                list.add(Arrays.toString(nextLine).split(";"));
-
-                try {
-                    String[] changeFileString = Arrays.toString(nextLine).split(";");
-                    for (int i = changeFileString.length; i > changeFileString.length - 1; i--) {
-                        translateRequest = new Translate();
-                        String request = translateRequest.Post(changeFileString[changeFileString.length - 1].replaceFirst("\"","").replaceFirst("]",""));
+            while ((nextLine = reader.readNext()) != null) {
+                if (nextLine != null) {
+                    try {
+                        String[] changeFileString = Arrays.toString(nextLine).split(";");
 
 
-                        //System.out.println(changeFileString[changeFileString.length - 1].replaceFirst("\"","").replaceFirst("]",""));
+                        //This step describe last elements from array and we enter their and translate with help class Translate.
+                        for (int i = changeFileString.length; i > changeFileString.length - 1; i--) {
+                            translateRequest = new Translate();
+                            String translate = translateRequest.Post(changeFileString[changeFileString.length - 1].replaceFirst("\"","").replaceFirst("]",""));
 
+                            //Clear ukr language
+
+                            //System.out.println(Arrays.toString(changeFileString));
+                            String ukr =  "\"" + translate.substring(76, translate.length()-15) + "\"";
+
+
+                            String[]toWrite = Arrays.toString(changeFileString).replace(changeFileString[changeFileString.length - 1], ukr).split(",");
+
+                            //System.out.println(count +"  ----  " + Arrays.toString(toWrite));
+
+
+                            String conc = "";
+
+                            for (String s:
+                                    toWrite) {
+                                conc += s.concat(";").trim();
+
+                            }
+
+                           StringBuffer stringBuffer = new StringBuffer(conc);
+                            stringBuffer.delete(0,2);
+                            stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
+
+                            writer.writeNext(stringBuffer.toString().split(";"));
+
+                            System.out.println(count +"  ----  " + stringBuffer);
+
+                            count++;
+
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
 
+                }
             }
+            reader.close();
+            writer.close();
+
         }
 
     }
-}
