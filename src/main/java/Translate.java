@@ -64,7 +64,7 @@ public class Translate {
     }
 
     */
-    private final static String keyAPI = "a88c4e8cfcmsh8b71b706fe65f6ap1a3b8djsn29be1481e0a4";
+    private final static String keyAPI = "730e978c42mshc711cc7ac810b72p14113djsn68a07415c06c";
 
     public static String getKeyAPI() {
         return keyAPI;
