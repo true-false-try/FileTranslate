@@ -3,7 +3,7 @@ import com.opencsv.exceptions.CsvValidationException;
 import java.io.FileReader;
 import java.util.Arrays;
 import java.io.*;
-import java.util.regex.Pattern;
+
 
 
 public class ParseFile {
@@ -27,40 +27,34 @@ public class ParseFile {
                             CSVWriter.NO_QUOTE_CHARACTER,
                             CSVWriter.NO_QUOTE_CHARACTER,
                             CSVWriter.DEFAULT_LINE_END);
+
+
             String[] nextLine;
 
             while ((nextLine = reader.readNext()) != null) {
                 if (nextLine != null) {
                     try {
                         String[] changeFileString = Arrays.toString(nextLine).split(";");
-                        //System.out.println(count +"  ----  " +  Arrays.toString(changeFileString));
-
 
                         //This step describe last elements from array and we enter their and translate with help class Translate.
                         for (int i = changeFileString.length; i > changeFileString.length - 1; i--) {
                             translateRequest = new Translate();
                             String translate = translateRequest.Post(changeFileString[changeFileString.length - 1].replaceFirst("\"","").replaceFirst("]",""));
 
-                            //System.out.println(count +"  ----  " +  translate);
-
                             //Clear ukr language
-
-                            //System.out.println(Arrays.toString(changeFileString));
                             String ukr =  "\"" + translate.substring(76, translate.length()-15) + "\"";
-
-                            //System.out.println(count +"  ----  " + ukr);
+                            //Part fix to exception with incorrect translate
+                            if (ukr.equals("\"\": \"Your Client (working) ---> Gateway (working) ---> API \"")){
+                                translate = translateRequest.Post(changeFileString[changeFileString.length - 1].replaceFirst("\"","").replaceFirst("]","").replace("\"","'"));
+                                ukr =  "\"" + translate.substring(76, translate.length()-15).replace("'","\"") + "\"";
+                            }
 
                             String conc1 = "";
-
                             for (String s:
                                     changeFileString) {
                                 conc1 += s.concat(";").trim();
-
                             }
                             String[]toWrite = conc1.replace(changeFileString[changeFileString.length - 1], ukr).split(";");
-
-                            //System.out.println(count +"  ----  " + Arrays.toString(toWrite));
-
 
                             String conc = "";
 
@@ -70,19 +64,19 @@ public class ParseFile {
 
                             }
 
-                            StringBuffer stringBuffer = new StringBuffer(conc);
-                            stringBuffer.delete(0,1);
-                            stringBuffer.delete(stringBuffer.length() - 1, stringBuffer.length());
+                            StringBuilder stringBuilder = new StringBuilder(conc);
+                            stringBuilder.delete(0,1);
+                            stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
 
-                            String[] outString = stringBuffer.toString().split(";\"(?=\"([А-Я]))|;");
+                            String[] outString = stringBuilder.toString().split(";\"(?=\"([А-Я]))|;");
 
                             writer.writeNext(outString);
                             System.out.println(count + "    ----    " + Arrays.toString(outString));
 
                             count++;
-
                         }
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex) {
                         ex.printStackTrace();
                     }
 
